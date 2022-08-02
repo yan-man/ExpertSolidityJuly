@@ -191,8 +191,8 @@ const tutorialLogic = {
     }
     let error = "";
     for await (const chunk of child.stderr) {
-      console.error("stderr chunk: " + chunk);
-      console.error("chunk");
+//       console.error("stderr chunk: " + chunk);
+//       console.error("chunk");
       error += chunk;
     }
     const exitCode = await new Promise((resolve, reject) => {
