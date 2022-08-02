@@ -8,10 +8,10 @@ contract Intro {
           
         // Yul assembly magic happens within assembly{} section
         assembly {            
-            // stack variables are isntaniated with 
+            // stack variables are instantiated with 
             // let variable_name := VALUE            
 
-            // instainate stack variable that holds value of mol            
+            // instantiate stack variable that holds value of mol            
             
 
             // To return it needs to be stored in memory
