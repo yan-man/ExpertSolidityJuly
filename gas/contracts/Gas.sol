@@ -10,16 +10,6 @@ contract Constants {
 }
 
 contract GasContract is Ownable, Constants {
-    uint256 public totalSupply = 0; // cannot be updated
-    uint256 public paymentCounter = 0;
-    mapping(address => uint256) public balances;
-    uint256 public tradePercent = 12;
-    address public contractOwner;
-    uint256 public tradeMode = 0;
-    mapping(address => Payment[]) public payments;
-    mapping(address => uint256) public whitelist;
-    address[5] public administrators;
-    bool public isReady = false;
     enum PaymentType {
         Unknown,
         BasicPayment,
@@ -27,10 +17,6 @@ contract GasContract is Ownable, Constants {
         Dividend,
         GroupPayment
     }
-    PaymentType constant defaultPayment = PaymentType.Unknown;
-
-    History[] public paymentHistory; // when a payment was updated
-
     struct Payment {
         PaymentType paymentType;
         uint256 paymentID;
@@ -40,38 +26,40 @@ contract GasContract is Ownable, Constants {
         address admin; // administrators address
         uint256 amount;
     }
-
     struct History {
         uint256 lastUpdate;
         address updatedBy;
         uint256 blockNumber;
     }
-    uint256 wasLastOdd = 1;
-    mapping(address => uint256) public isOddWhitelistUser;
     struct ImportantStruct {
         uint256 valueA; // max 3 digits
         uint256 bigValue;
         uint256 valueB; // max 3 digits
     }
-
+    uint256 private wasLastOdd;
+    uint256 public totalSupply; // cannot be updated
+    uint256 public paymentCounter;
+    uint256 public tradePercent;
+    uint256 public tradeMode;
+    address public contractOwner;
+    address[5] public administrators;
+    bool public isReady;
+    mapping(address => uint256) public balances;
+    mapping(address => Payment[]) public payments;
+    mapping(address => uint256) public whitelist;
+    mapping(address => uint256) public isOddWhitelistUser;
     mapping(address => ImportantStruct) public whiteListStruct;
+    PaymentType constant defaultPayment = PaymentType.Unknown;
+    History[] public paymentHistory; // when a payment was updated
 
     event AddedToWhitelist(address userAddress, uint256 tier);
 
     modifier onlyAdminOrOwner() {
         address senderOfTx = msg.sender;
-        if (checkForAdmin(senderOfTx)) {
-            require(
-                checkForAdmin(senderOfTx),
-                "Gas Contract Only Admin Check-  Caller not admin"
-            );
-            _;
-        } else if (senderOfTx == contractOwner) {
+        if (checkForAdmin(senderOfTx) || senderOfTx == contractOwner) {
             _;
         } else {
-            revert(
-                "Error in Gas contract - onlyAdminOrOwner modifier : revert happened because the originator of the transaction was not the admin, and furthermore he wasn't the owner of the contract, so he cannot run this function"
-            );
+            revert("Not admin");
         }
     }
 
@@ -104,6 +92,9 @@ contract GasContract is Ownable, Constants {
     event WhiteListTransfer(address indexed);
 
     constructor(address[] memory _admins, uint256 _totalSupply) {
+        wasLastOdd = 1;
+        isReady = false;
+        tradePercent = 12;
         contractOwner = msg.sender;
         totalSupply = _totalSupply;
 
